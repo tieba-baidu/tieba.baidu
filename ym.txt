@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>发布页 · 22.gd</title>
+
+  <!-- 基础垫片：全面屏安全区 / 触控优化 / 输入框防缩放。可删，不影响页面 -->
+  <style id="ss-base-reset">
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      -webkit-font-smoothing: antialiased;
+    }
+    img, video, canvas, svg { max-width: 100%; height: auto; }
+    table { max-width: 100%; }
+    pre, code { overflow-x: auto; }
+    body { overflow-wrap: break-word; word-break: break-word; }
+    button, a, [role="button"], input, select, textarea, label { touch-action: manipulation; }
+    a, button, [role="button"] { -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05); }
+    input, select, textarea { font-size: 16px; }
+  </style>
+
+  <!-- 业务样式 -->
+  <style>
+    :root{--bg:#0b0f14;--card:rgba(255,255,255,.06);--card-h:rgba(255,255,255,.105);--bd:rgba(255,255,255,.09);--tx:#eef2f7;--tx2:#8b97a8;--accent:#22c55e;--sh:0 8px 24px rgba(0,0,0,.35)}
+    html.light{--bg:#f4f6fa;--card:rgba(255,255,255,.9);--card-h:#fff;--bd:rgba(15,23,42,.08);--tx:#0f172a;--tx2:#64748b;--sh:0 6px 20px rgba(15,23,42,.08)}
+    body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;justify-content:center;padding:52px 20px calc(40px + env(safe-area-inset-bottom));transition:background .35s,color .35s;position:relative;overflow-x:hidden}
+    #app{width:100%;display:flex;justify-content:center}
+    .glow{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .glow::before,.glow::after{content:"";position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+    .glow::before{width:340px;height:340px;background:rgba(34,197,94,.28);top:-120px;left:-100px}
+    .glow::after{width:300px;height:300px;background:rgba(56,189,248,.22);bottom:-110px;right:-90px}
+    .wrap{width:100%;max-width:480px;position:relative;z-index:1}
+    .toggle{position:fixed;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--tx);cursor:pointer;display:grid;place-items:center;z-index:10;transition:.25s}
+    .toggle:hover{background:var(--card-h);transform:scale(1.06)}
+    .toggle svg{width:20px;height:20px}
+    header{text-align:center;margin-bottom:26px}
+    .avatar{width:92px;height:92px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;font-size:34px;font-weight:600;color:#fff;background:linear-gradient(135deg,#22c55e,#0ea5e9);box-shadow:0 0 0 4px rgba(34,197,94,.14),0 0 34px rgba(34,197,94,.28);animation:breathe 4.5s ease-in-out infinite}
+    @keyframes breathe{0%,100%{box-shadow:0 0 0 4px rgba(34,197,94,.14),0 0 34px rgba(34,197,94,.28)}50%{box-shadow:0 0 0 8px rgba(34,197,94,.07),0 0 48px rgba(34,197,94,.4)}}
+    h1{font-size:22px;font-weight:650;letter-spacing:.3px}
+    .bio{color:var(--tx2);font-size:14px;margin-top:7px;line-height:1.6}
+    .handle{color:var(--accent);font-size:13px;margin-top:6px;font-weight:500}
+    .social{display:flex;justify-content:center;gap:12px;margin:20px 0 24px}
+    .social a{width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);background:var(--card);display:grid;place-items:center;color:var(--tx2);transition:.25s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+    .social a:hover{color:var(--accent);border-color:rgba(34,197,94,.5);transform:translateY(-2px)}
+    .social svg{width:19px;height:19px}
+    .links{display:flex;flex-direction:column;gap:12px}
+    .card{display:flex;align-items:center;gap:14px;width:100%;padding:15px 17px;border-radius:16px;background:var(--card);border:1px solid var(--bd);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-decoration:none;color:inherit;font-family:inherit;font-size:inherit;text-align:left;cursor:pointer;-webkit-appearance:none;appearance:none;box-shadow:var(--sh);transition:transform .22s,background .22s,border-color .22s,box-shadow .22s;animation:rise .55s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(var(--i)*65ms)}
+    @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+    .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;background:rgba(var(--tint),.14);color:rgb(var(--tint))}
+    .ico svg{width:20px;height:20px}
+    .txt{flex:1;min-width:0}
+    .t{display:block;font-size:15px;font-weight:600;line-height:1.35}
+    .s{display:block;font-size:12.5px;color:var(--tx2);margin-top:2px;line-height:1.4}
+    .arr{width:17px;height:17px;color:var(--tx2);flex:0 0 auto;transition:transform .22s,color .22s}
+    @media(hover:hover){.card:hover{background:var(--card-h);transform:translateY(-3px);border-color:rgba(34,197,94,.32);box-shadow:0 14px 30px rgba(0,0,0,.28)}.card:hover .arr{transform:translateX(4px);color:var(--accent)}}
+    .card:active{transform:scale(.985)}
+    .card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    footer{margin-top:26px;text-align:center}
+    .note{display:flex;align-items:center;justify-content:center;gap:6px;margin:18px 0 0;font-size:12.5px;color:var(--tx2);line-height:1.7;text-align:center}
+    .note svg{width:13px;height:13px;flex:0 0 auto;opacity:.85}
+    .share{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:13.5px;font-family:inherit;cursor:pointer;transition:.22s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+    .share:hover{border-color:rgba(34,197,94,.45);color:var(--accent)}
+    .share svg{width:16px;height:16px}
+    .copy{margin-top:16px;color:var(--tx2);font-size:12.5px}
+    .toast{position:fixed;left:50%;bottom:calc(34px + env(safe-area-inset-bottom));transform:translate(-50%,16px);background:rgba(20,26,34,.94);color:#fff;font-size:13px;padding:11px 20px;border-radius:11px;opacity:0;pointer-events:none;transition:.28s;z-index:99;border:1px solid rgba(255,255,255,.1);max-width:calc(100vw - 40px);text-align:center}
+    .toast.on{opacity:1;transform:translate(-50%,0)}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="glow"></div>
+
+    <button class="toggle" id="tg" type="button" aria-label="切换为浅色主题">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg>
+    </button>
+
+    <div class="wrap">
+      <header>
+        <div class="avatar">i</div>
+        <h1>导航</h1>
+        <p class="bio">永久地址：22.gd</p>
+        <p class="handle">@22gd</p>
+      </header>
+
+      <div class="social">
+        <a href="#" aria-label="微信"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.2 4C5.2 4 2 6.7 2 10c0 1.9 1 3.6 2.6 4.7L4 17l2.5-1.3c.9.3 1.8.4 2.7.4h.4a5.6 5.6 0 0 1-.2-1.5c0-3.2 3-5.8 6.7-5.8h.6C16 5.9 13 4 9.2 4zm-2.4 3.2a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8zm4.8 0a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8z"/><path d="M22 14.5c0-2.6-2.6-4.7-5.7-4.7s-5.7 2.1-5.7 4.7 2.6 4.7 5.7 4.7c.7 0 1.4-.1 2-.3l2 1-.5-1.7c1.3-.9 2.2-2.2 2.2-3.7zm-7.6-1.3a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5zm3.8 0a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5z"/></svg></a>
+        <a href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3.1l-6.8 7.8L21.8 21h-6.2l-4.9-6.4L5.1 21H2l7.3-8.3L2.5 3h6.4l4.4 5.8L17.5 3zm-1.1 16.1h1.7L7.7 4.8H5.9l10.5 14.3z"/></svg></a>
+        <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.5c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg></a>
+        <a href="#" aria-label="邮箱"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="4.8" width="18.4" height="14.4" rx="2.4"/><path d="M3.4 6.6l8.6 6 8.6-6"/></svg></a>
+      </div>
+
+      <nav class="links" aria-label="我的链接列表">
+
+        <!-- 卡片 1：永久地址（点击复制，按钮非链接） -->
+        <button class="card" id="cp" type="button" style="--i:0;--tint:14,165,233" aria-label="复制永久地址 22.gd">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.6" y="8.6" width="11" height="11" rx="2.4"/><path d="M15.4 5.8A2.4 2.4 0 0 0 13 4H6.4A2.4 2.4 0 0 0 4 6.4V13a2.4 2.4 0 0 0 1.8 2.3"/></svg></span>
+          <span class="txt"><span class="t">永久地址</span><span class="s">22.gd · 点击复制</span></span>
+          <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.6" y="8.6" width="11" height="11" rx="2.4"/><path d="M15.4 5.8A2.4 2.4 0 0 0 13 4H6.4A2.4 2.4 0 0 0 4 6.4V13a2.4 2.4 0 0 0 1.8 2.3"/></svg>
+        </button>
+
+        <!-- 卡片 2：聚合导航 -->
+        <a class="card" href="https://link3.cc/22gd" style="--i:1;--tint:34,197,94" aria-label="聚合导航">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M3.4 12h17.2"/><path d="M12 3.4c2.35 2.4 3.65 5.4 3.65 8.6S14.35 18.2 12 20.6c-2.35-2.4-3.65-5.4-3.65-8.6S9.65 5.8 12 3.4z"/></svg></span>
+          <span class="txt"><span class="t">聚合导航</span><span class="s">导航点击进入</span></span>
+          <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        <!-- 卡片 3：备用入口 -->
+        <a class="card" href="https://91.lc" style="--i:2;--tint:244,63,94" aria-label="备用入口">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="4.4" width="17.6" height="15.2" rx="3"/><path d="M7.6 9.4v5.2M12 9.4v5.2M16.4 9.4v5.2"/></svg></span>
+          <span class="txt"><span class="t">备用入口</span><span class="s">备用入口点击进入</span></span>
+          <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+      </nav>
+
+      <p class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 10.4V7.8a5.4 5.4 0 0 1 10.8 0v2.6"/><rect x="4.4" y="10.4" width="15.2" height="9.4" rx="2.4"/></svg>
+        <span>建议收藏本页 · 记住永久地址 22.gd，找不到入口时回来这里</span>
+      </p>
+
+      <footer>
+        <button class="share" id="sh" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.6 12v7.4a1.6 1.6 0 0 0 1.6 1.6h11.6a1.6 1.6 0 0 0 1.6-1.6V12"/><path d="M16 6.4L12 2.6 8 6.4M12 2.6v12"/></svg>
+          分享本页
+        </button>
+        <p class="copy">© 2026 情久</p>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var root = document.documentElement;
+    var tgBtn = document.getElementById('tg');
+    var shareBtn = document.getElementById('sh');
+    var toastEl = document.getElementById('toast');
+
+    /* ---------------- 主题切换（纯内存状态，刷新重置为系统偏好） ---------------- */
+    var mqLight = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+    var isLight = !!(mqLight && mqLight.matches);
+
+    function applyTheme(light) {
+      isLight = light;
+      if (light) { root.classList.add('light'); } else { root.classList.remove('light'); }
+      if (tgBtn) { tgBtn.setAttribute('aria-label', light ? '切换为深色主题' : '切换为浅色主题'); }
+    }
+    applyTheme(isLight);
+
+    if (tgBtn) {
+      tgBtn.addEventListener('click', function () { applyTheme(!isLight); });
+    }
+
+    /* ---------------- toast ---------------- */
+    var toastTimer = null;
+
+    function showToast(msg) {
+      if (!toastEl) return;
+      toastEl.textContent = msg;
+      toastEl.classList.add('on');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        toastEl.classList.remove('on');
+        toastTimer = null;
+      }, 1800);
+    }
+
+    /* ---------------- 复制降级方案 ---------------- */
+    function legacyCopy(text) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /* ---------------- 分享本页 ---------------- */
+    function copyLink() {
+      var url = location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function () {
+          showToast('链接已复制，去分享吧');
+        }).catch(function () {
+          showToast(legacyCopy(url) ? '链接已复制，去分享吧' : '复制失败，请手动复制地址栏');
+        });
+      } else {
+        showToast(legacyCopy(url) ? '链接已复制，去分享吧' : '复制失败，请手动复制地址栏');
+      }
+    }
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', function () {
+        if (navigator.share) {
+          navigator.share({
+            title: document.title,
+            text: '导航 · 22.gd',
+            url: location.href
+          }).catch(function (err) {
+            if (err && err.name === 'AbortError') return;
+            copyLink();
+          });
+        } else {
+          copyLink();
+        }
+      });
+    }
+
+    /* ---------------- 复制永久地址 ---------------- */
+    var PERMALINK = '22.gd';
+    var copyCard = document.getElementById('cp');
+
+    function copyPermalink() {
+      var ok = '永久地址 ' + PERMALINK + ' 已复制';
+      var fail = '复制失败，请手动记下 ' + PERMALINK;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(PERMALINK).then(function () {
+          showToast(ok);
+        }).catch(function () {
+          showToast(legacyCopy(PERMALINK) ? ok : fail);
+        });
+      } else {
+        showToast(legacyCopy(PERMALINK) ? ok : fail);
+      }
+    }
+
+    if (copyCard) {
+      copyCard.addEventListener('click', copyPermalink);
+    }
+
+    /* ---------------- 社交图标：href="#" 时提示，避免误跳顶部 ---------------- */
+    var socialLinks = document.querySelectorAll('.social a');
+    Array.prototype.forEach.call(socialLinks, function (link) {
+      link.addEventListener('click', function (e) {
+        var href = link.getAttribute('href');
+        if (!href || href === '#') {
+          e.preventDefault();
+          showToast('该联系方式待补充');
+        }
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
